@@ -557,8 +557,8 @@ jQuery( document ).ready(function() {
         }
 
         jQuery( this ).html( 'Redirecting...' );
-
-        var authURL = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?state=${PostSMTPWizard.office365State}&scope=openid profile offline_access Mail.Send Mail.Send.Shared&response_type=code&approval_prompt=auto&redirect_uri=${PostSMTPWizard.adminURL}&client_id=${office365_app_id}`;
+        var tenant = PostSMTPWizard.tenantId || 'common';
+        var authURL = `https://login.microsoftonline.com/${tenant}/oauth2/v2.0/authorize?state=${PostSMTPWizard.office365State}&scope=openid profile offline_access Mail.Send Mail.Send.Shared&response_type=code&approval_prompt=auto&redirect_uri=${PostSMTPWizard.adminURL}&client_id=${office365_app_id}`;
         
         jQuery.ajax( {
 
@@ -814,4 +814,39 @@ jQuery(document).ready(function ($) {
 
     // Listen for changes on the checkbox
     jQuery('.ps-enable-gmail-one-click').on('change', toggleFields);
+    
 });
+
+jQuery(document).ready(function($) {
+    $(".ps-form-control p, .ps-form-ui p, .ps-wizard-socket p").each(function() {
+        var $p = $(this);
+        var words = $p.html().trim().split(/\s+/);
+
+        if (words.length > 15) {
+            var fullText = $p.html();
+            var shortText = words.slice(0, 15).join(" ") + "...";
+
+            // Save original in data attributes
+            $p.data("full-text", fullText);
+            $p.data("short-text", shortText);
+
+            // Start with short text
+            $p.html(shortText + ' <a href="#" class="ps-toggle-text">Show More</a>');
+        }
+    });
+
+    // Toggle handler
+    $(document).on("click", ".ps-toggle-text", function(e) {
+        e.preventDefault();
+        var $link = $(this);
+        var $p = $link.closest("p");
+
+        if ($link.text() === "Show More") {
+            $p.html($p.data("full-text") + ' <a href="#" class="ps-toggle-text">Show Less</a>');
+        } else {
+            $p.html($p.data("short-text") + ' <a href="#" class="ps-toggle-text">Show More</a>');
+        }
+    });
+});
+
+
